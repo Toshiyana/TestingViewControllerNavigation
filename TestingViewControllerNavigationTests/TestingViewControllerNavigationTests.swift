@@ -27,6 +27,7 @@ class TestingViewControllerNavigationTests: XCTestCase {
         navigationController = nil
     }
     
+    // Pattern1: use expectations to wait for push transition to complete
     func testNextViewButton_WhenTapped_SecondViewControllerIsPushed() {
         let myPredicate = NSPredicate { input, _ in
             return (input as? UINavigationController)?.topViewController is SecondViewController
@@ -38,13 +39,23 @@ class TestingViewControllerNavigationTests: XCTestCase {
         
         waitForExpectations(timeout: 1.5) // 遷移時のanimation時間を考慮, 何回かテストしてみて時間が十分か確認
         
-        
-        
         // 以下の方法では、テストできない。（buttonをtapしてから遷移するまでのanimation時間を考慮していないため）
 //        guard let _ = navigationController.topViewController as? SecondViewController else {
 //            XCTFail()
 //            return
 //        }
+    }
+    
+    // Pattern2: use loop to wait for push transition to complete
+    func testNextViewButton_WhenTapped_SecondViewControllerIsPushed_V2() {
+        sut.nextViewButton.sendActions(for: .touchUpInside)
+        
+        RunLoop.current.run(until: Date())
+        
+        guard let _ = navigationController.topViewController as? SecondViewController else {
+            XCTFail()
+            return
+        }
     }
 
 }
